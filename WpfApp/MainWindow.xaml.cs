@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,6 +23,15 @@ namespace WpfApp
 {
     public class ImageInfo
     {
+        private int id;
+        public int Id
+        {
+            get { return this.id; }
+            set { this.id = value; }
+        }
+
+        public static int IdCount = 0;
+
         private string filePath;
         public string FilePath
         {
@@ -55,12 +65,14 @@ namespace WpfApp
             this.FilePath = fp;
             this.Image = img;
             this.ImageBmp = bmi;
+            this.Id = IdCount;
+            IdCount++;
         }
 
-        public string AssignInfo(Task<List<Tuple<string, float>>> emotions_list)
+        public string AssignInfo(List<Tuple<string, float>> emotions_list)
         {
             string _info = "";
-            foreach (var emotion in emotions_list.Result) _info += $"{emotion.Item1} : {emotion.Item2}\n";
+            foreach (var emotion in emotions_list) _info += $"{emotion.Item1} : {emotion.Item2}\n";
             this.Info = _info;
             return _info;
         }
@@ -96,13 +108,52 @@ namespace WpfApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        ObservableCollection<ImageInfo> list_neutral = new();
-        ObservableCollection<ImageInfo> list_new = new();
-        EmotionsLib.EmotionFerPlus EmotionCounter;
+        static List<string> emotions_list = new() { "neutral", "happiness", "surprise", "sadness", "anger", "disgust", "fear", "contempt" };
+        static ObservableCollection<ImageInfo> list_neutral = new();
+        static ObservableCollection<ImageInfo> list_happiness = new();
+        static ObservableCollection<ImageInfo> list_surprise = new();
+        static ObservableCollection<ImageInfo> list_sadness = new();
+        static ObservableCollection<ImageInfo> list_anger = new();
+        static ObservableCollection<ImageInfo> list_disgust = new();
+        static ObservableCollection<ImageInfo> list_fear = new() ;
+        static ObservableCollection<ImageInfo> list_contempt = new();
+        static ObservableCollection<ImageInfo> list_new = new();
+        static ObservableCollection<ImageInfo> list_all = new();
+        Dictionary<string, ObservableCollection<ImageInfo>> dict_all = new Dictionary<string, ObservableCollection<ImageInfo>>()
+        {
+            { "neutral", list_neutral },
+            { "happiness", list_happiness },
+            { "surprise", list_surprise },
+            { "sadness", list_sadness },
+            { "anger", list_anger },
+            { "disgust", list_disgust },
+            { "fear", list_fear },
+            { "contempt", list_contempt },
+            { "all", list_all },
+            { "new", list_new }
+        };
+
+        Dictionary<string, ObservableCollection<ImageInfo>> dict_new = new Dictionary<string, ObservableCollection<ImageInfo>>()
+        {
+            { "neutral", new ObservableCollection<ImageInfo>() },
+            { "happiness", new ObservableCollection<ImageInfo>() },
+            { "surprise", new ObservableCollection<ImageInfo>() },
+            { "sadness", new ObservableCollection<ImageInfo>() },
+            { "anger", new ObservableCollection<ImageInfo>() },
+            { "disgust", new ObservableCollection<ImageInfo>() },
+            { "fear", new ObservableCollection<ImageInfo>() },
+            { "contempt", new ObservableCollection<ImageInfo>() },
+            { "all", new ObservableCollection<ImageInfo>() },
+        };
+
+        EmotionsLib.EmotionFerPlus EmotionCounter = new();
+        CancellationTokenSource cts;
+        bool TaskInProcess = false;
+
         public MainWindow()
         {
             InitializeComponent();
-            EmotionCounter = new EmotionsLib.EmotionFerPlus();
+            //EmotionCounter = new EmotionsLib.EmotionFerPlus();
         }
 
         private void LoadImagesCmd(object sender, RoutedEventArgs e)
@@ -118,16 +169,161 @@ namespace WpfApp
             //else throw new Exception("OpenFileDialog not working");
             else return;
 
-            foreach(string file_name in file_names)
+            //MessageBox.Show($"{ImageInfo.IdCount}");
+
+            foreach (string file_name in file_names)
             {
-                using Image<Rgb24> image = SixLabors.ImageSharp.Image.Load<Rgb24>(file_name);
+                Image<Rgb24> image = SixLabors.ImageSharp.Image.Load<Rgb24>(file_name);
                 BitmapImage imgBmi = new BitmapImage(new Uri(file_name));
-                imgBmi.DecodePixelHeight = 10;
+                //image.Frames
+                //imgBmi.DecodePixelHeight = 10;
                 //string fileName = file_name.Remove(0, file_name.LastIndexOf('\\') + 1);
                 list_new.Add(new ImageInfo(file_name.Remove(0, file_name.LastIndexOf('\\') + 1), image, imgBmi));
             }
-            Console.WriteLine($"New images: {list_new.Count}");
+            //Console.WriteLine($"New images: {list_new.Count}");
             listNew.ItemsSource = list_new;
+        }
+
+        private async Task<ImageInfo> AnalyzeImage(ImageInfo image, CancellationTokenSource cts)
+        {
+            //CancellationTokenSource cts = new CancellationTokenSource();
+            //CancellationToken token = cts.Token;
+
+            var Emotions = await Task.Run(async () =>
+            {
+                var emotions = EmotionCounter.EmotionRecognition(image.Image, cts.Token).Result;
+                emotions.Sort((a, b) => -(a.Item2.CompareTo(b.Item2)));
+                image.AssignInfo(emotions);
+                return emotions;
+            }, cts.Token);
+            string field = Emotions[0].Item1;
+            dict_new[field].Add(image);
+            dict_new["all"].Add(image);
+            //list_all.Add(image);
+            //list_new.Remove(image);
+
+            //MessageBox.Show($"Done {image.FilePath}");
+            return image;   //Emotions;
+        }
+
+        private void CancelCmd(object sender, RoutedEventArgs e)
+        {
+            if (!TaskInProcess)
+            {
+                MessageBox.Show("Analysis wasn't started");
+            }
+            else
+            {
+                cts.Cancel();
+                foreach (var pair in dict_all)
+                {
+                    pair.Value.Clear();
+                }
+
+                progress_bar.Visibility = Visibility.Hidden;
+                txt_progress.Visibility = Visibility.Visible;
+
+                TaskInProcess = false;
+            }
+        }
+
+        private void ClearCmd(object sender, RoutedEventArgs e)
+        {
+            if (((TabItem)TabCtrl.SelectedItem).HasHeader)
+            {
+                var i = ((TabItem)TabCtrl.SelectedItem).Header.ToString().ToLower();
+                MessageBox.Show($"{i /*dict_all[i].ToString()*/}");
+                dict_all[i].Clear();
+                //MessageBox.Show($"{dict_all[i].Count.ToString()}");
+            } else
+            {
+                MessageBox.Show($"Header not found in this tab");
+                var ind = TabCtrl.SelectedIndex;
+                dict_all[emotions_list[ind]].Clear();
+                //MessageBox.Show($"{dict_all[emotions_list[ind]].Count.ToString()}");
+            }
+        }
+
+        private void ClearAllCmd(object sender, RoutedEventArgs e)
+        {
+            foreach(var pair in dict_all)
+            {
+                pair.Value.Clear();
+            }
+        }
+
+        private void AnalyzeImagesCmd(object sender, RoutedEventArgs e)
+        {
+            if (list_new.Count == 0)
+            {
+                MessageBox.Show("No images to analyze");
+            }
+            else
+            {
+                try
+                {
+                    TaskInProcess = true;
+
+                    progress_bar.Visibility = Visibility.Visible;
+                    progress_bar.Maximum = list_new.Count;
+                    txt_progress.Visibility = Visibility.Hidden;
+
+                    cts = new CancellationTokenSource();
+                    
+                    foreach (var image in list_new)
+                    {
+                        //MessageBox.Show($"{image.Id}, {image.Info}");
+                        _ = AnalyzeImage(image, cts);
+                        progress_bar.Value += 1;
+                    }
+
+                    //foreach (var i in dict_new.Values) MessageBox.Show($"{i.Count}");
+
+                    progress_bar.Visibility = Visibility.Hidden;
+                    txt_progress.Visibility = Visibility.Visible;
+
+                    foreach (var state in dict_new.Keys)
+                    {
+                        //var a = dict_all[state.Key];
+                        //dict_new[state].CopyTo(dict_all[state], dict_all[state].Count);
+                        // ForEach(collection.Add);
+                        //dict_all[state] = (ObservableCollection<ImageInfo>)dict_all[state].Concat(dict_new[state]);
+                        foreach (var item in dict_new[state])
+                        {
+                            dict_all[state].Add(item);
+                        }
+                    }
+
+                    //foreach (var i in dict_all.Values) MessageBox.Show($"{i.Count}");
+
+                    foreach (var pair in dict_new)
+                    {
+                        pair.Value.Clear();
+                    }
+
+                    //foreach (var i in dict_all.Values) MessageBox.Show($"{i.Count}");
+
+                    list_new.Clear();
+
+                    listAll.ItemsSource = dict_all["all"];
+                    listNeutral.ItemsSource = dict_all["neutral"];
+                    listHappiness.ItemsSource = dict_all["happiness"];
+                    listSurprise.ItemsSource = dict_all["surprise"];
+                    listSadness.ItemsSource = dict_all["sadness"];
+                    listAnger.ItemsSource = dict_all["anger"];
+                    listDisgust.ItemsSource = dict_all["disgust"];
+                    listFear.ItemsSource = dict_all["fear"];
+                    listContempt.ItemsSource = dict_all["contempt"];
+
+                    //foreach (var i in dict_all.Values) MessageBox.Show($"{i.Count}");
+                }
+                catch
+                {
+                    MessageBox.Show("Analysis was canceled");
+                }
+
+                TaskInProcess = false;
+            }
         }
     }
 }
