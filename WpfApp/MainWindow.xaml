@@ -11,27 +11,23 @@
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10*"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
 
-        <Menu Height ="25" VerticalAlignment="Top" Grid.Row="0">
-            <MenuItem Header="Load images" Click="LoadImagesCmd" VerticalAlignment="Stretch" BorderBrush="Black"/>
-            <MenuItem Header="Analyze" Command="" VerticalAlignment="Stretch" BorderBrush="Black"/>
-            <MenuItem Header="Cancel" Command="" VerticalAlignment="Stretch" BorderBrush="Black"/>
+        <Menu Height ="25" Grid.Row="0">
+            <!--VerticalAlignment="Stretch"-->
+            <MenuItem Header="Load images" Click="LoadImagesCmd" Height="25" BorderBrush="Black"/>
+            <MenuItem Header="Analyze" Click="AnalyzeImagesCmd" BorderBrush="Black"/>
+            <MenuItem Header="Cancel" Click="CancelCmd"  BorderBrush="Black"/>
+            <MenuItem Header="Clear" Click="ClearCmd"  BorderBrush="Black"/>
+            <MenuItem Header="Clear all" Click="ClearAllCmd"  BorderBrush="Black"/>
         </Menu>
 
-        <TabControl Grid.Row="1">
-            <TabItem>
-                <TabItem.Header>
-                    <TextBlock Margin="3">New</TextBlock>
-                </TabItem.Header>
+        <TabControl Grid.Row="1" Name="TabCtrl">
+            <TabItem Header="New">
                 <TabItem.Content>
                     <ListView x:Name="listNew" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_new}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Columns="5" HorizontalAlignment="Stretch"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
@@ -43,94 +39,145 @@
                     </ListView>
                 </TabItem.Content>
             </TabItem>
-            <TabItem Name="tab_neutral">
-                <TabItem.Header>
-                    <TextBlock Margin="3">Neutral</TextBlock>
-                </TabItem.Header>
+            <TabItem Name="tab_neutral" Header="Neutral">
                 <TabItem.Content>
                     <ListView x:Name="listNeutral" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_neutral}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Columns="5" HorizontalAlignment="Stretch"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                    <Image Source="{Binding SelectedItem.Image}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
-                                    <TextBlock Text="{Binding SelectedItem.Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
                                 </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
                 </TabItem.Content>
             </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <TextBlock Margin="3">Happiness</TextBlock>
-                </TabItem.Header>
+            <TabItem Header="Happiness">
                 <TabItem.Content>
-                    <TextBlock Margin="3"></TextBlock>
+                    <ListView x:Name="listHappiness" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_happiness}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </TabItem.Content>
             </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <TextBlock Margin="3">Surprise</TextBlock>
-                </TabItem.Header>
+            <TabItem Header="Surprise">
                 <TabItem.Content>
-                    <TextBlock Margin="3"></TextBlock>
+                    <ListView x:Name="listSurprise" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_surprise}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </TabItem.Content>
             </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <TextBlock Margin="3">Sadness</TextBlock>
-                </TabItem.Header>
+            <TabItem Header="Sadness">
                 <TabItem.Content>
-                    <TextBlock Margin="3"></TextBlock>
+                    <ListView x:Name="listSadness" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_sadness}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </TabItem.Content>
             </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <TextBlock Margin="3">Anger</TextBlock>
-                </TabItem.Header>
+            <TabItem Header="Anger">
                 <TabItem.Content>
-                    <TextBlock Margin="3"></TextBlock>
+                    <ListView x:Name="listAnger" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_anger}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </TabItem.Content>
             </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <TextBlock Margin="3">Disgust</TextBlock>
-                </TabItem.Header>
+            <TabItem Header="Disgust">
                 <TabItem.Content>
-                    <TextBlock Margin="3"></TextBlock>
+                    <ListView x:Name="listDisgust" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_disgust}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </TabItem.Content>
             </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <TextBlock Margin="3">Fear</TextBlock>
-                </TabItem.Header>
+            <TabItem Header="Fear">
                 <TabItem.Content>
-                    <TextBlock Margin="3"></TextBlock>
+                    <ListView x:Name="listFear" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_fear}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </TabItem.Content>
             </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <TextBlock Margin="3">Contempt</TextBlock>
-                </TabItem.Header>
+            <TabItem Header="Contempt">
                 <TabItem.Content>
-                    <TextBlock Margin="3"></TextBlock>
+                    <ListView x:Name="listContempt" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_contempt}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </TabItem.Content>
             </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <TextBlock Margin="3">All</TextBlock>
-                </TabItem.Header>
+            <TabItem Header="All">
                 <TabItem.Content>
-                    <TextBlock Margin="3"></TextBlock>
+                    <ListView x:Name="listAll" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_all}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </TabItem.Content>
             </TabItem>
         </TabControl>
-        
+        <ProgressBar Name="progress_bar" HorizontalAlignment="Center" Height="30" Grid.Row="2" VerticalAlignment="Center" Width="270"/>
+        <TextBlock Name="txt_progress" HorizontalAlignment="Center" Grid.Row="2" TextWrapping="Wrap" Text="No task in process" VerticalAlignment="Center"/>
+
 
     </Grid>
 </Window>
