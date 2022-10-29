@@ -39,19 +39,26 @@
                     </ListView>
                 </TabItem.Content>
             </TabItem>
+            <!--Source="{Binding ImageBmp}"-->
             <TabItem Name="tab_neutral" Header="Neutral">
                 <TabItem.Content>
-                    <ListView x:Name="listNeutral" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_neutral}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
-                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                    <Grid>
+                        <ListView x:Name="listNeutral" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_neutral}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                        <Image Source="{Binding ImageBmp}" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="UniformToFill" >
+                                            <!--<Image.Source>
+                                                <BitmapImage UriSource="{Binding FilePath}" />
+                                            </Image.Source>-->
+                                        </Image>
+                                        <TextBlock Text="{Binding Info}" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+                                        <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Right" VerticalAlignment="Top" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
                 </TabItem.Content>
             </TabItem>
             <TabItem Header="Happiness">
