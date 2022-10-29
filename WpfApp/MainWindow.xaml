@@ -27,162 +27,177 @@
         <TabControl Grid.Row="1" Name="TabCtrl">
             <TabItem Header="New">
                 <TabItem.Content>
-                    <ListView x:Name="listNew" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_new}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
-                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </TabItem.Content>
-            </TabItem>
-            <!--Source="{Binding ImageBmp}"-->
-            <TabItem Name="tab_neutral" Header="Neutral">
-                <TabItem.Content>
-                    <Grid>
-                        <ListView x:Name="listNeutral" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_neutral}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ListView x:Name="listNew" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding [new]}">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                        <Image Source="{Binding ImageBmp}" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="UniformToFill" >
-                                            <!--<Image.Source>
-                                                <BitmapImage UriSource="{Binding FilePath}" />
-                                            </Image.Source>-->
-                                        </Image>
-                                        <TextBlock Text="{Binding Info}" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
-                                        <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Right" VerticalAlignment="Top" />
+                                        <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                        <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
                                     </StackPanel>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
-                    </Grid>
+                    </ScrollViewer>
+                </TabItem.Content>
+            </TabItem>
+            <TabItem Name="tab_neutral" Header="Neutral">
+                <TabItem.Content>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ListView x:Name="listNeutral" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding [neutral]}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                        <Image Source="{Binding ImageBmp}" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                                        <TextBlock Text="{Binding Info}" HorizontalAlignment="Right" VerticalAlignment="Top" />
+                                        <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
                 </TabItem.Content>
             </TabItem>
             <TabItem Header="Happiness">
                 <TabItem.Content>
-                    <ListView x:Name="listHappiness" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_happiness}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
-                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ListView x:Name="listHappiness" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding [happiness]}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                        <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                        <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                        <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
                 </TabItem.Content>
             </TabItem>
             <TabItem Header="Surprise">
                 <TabItem.Content>
-                    <ListView x:Name="listSurprise" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_surprise}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
-                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ListView x:Name="listSurprise" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding [surprise]}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                        <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                        <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                        <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
                 </TabItem.Content>
             </TabItem>
             <TabItem Header="Sadness">
                 <TabItem.Content>
-                    <ListView x:Name="listSadness" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_sadness}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
-                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ListView x:Name="listSadness" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding [sadness]}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                        <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                        <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                        <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
                 </TabItem.Content>
             </TabItem>
             <TabItem Header="Anger">
                 <TabItem.Content>
-                    <ListView x:Name="listAnger" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_anger}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
-                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ListView x:Name="listAnger" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding [anger]}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                        <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                        <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                        <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
                 </TabItem.Content>
             </TabItem>
             <TabItem Header="Disgust">
                 <TabItem.Content>
-                    <ListView x:Name="listDisgust" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_disgust}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
-                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ListView x:Name="listDisgust" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding [disgust]}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                        <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                        <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                        <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
                 </TabItem.Content>
             </TabItem>
             <TabItem Header="Fear">
                 <TabItem.Content>
-                    <ListView x:Name="listFear" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_fear}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
-                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ListView x:Name="listFear" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding [fear]}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                        <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                        <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                        <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
                 </TabItem.Content>
             </TabItem>
             <TabItem Header="Contempt">
                 <TabItem.Content>
-                    <ListView x:Name="listContempt" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_contempt}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
-                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ListView x:Name="listContempt" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding [contempt]}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                        <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                        <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                        <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
                 </TabItem.Content>
             </TabItem>
             <TabItem Header="All">
+                
                 <TabItem.Content>
-                    <ListView x:Name="listAll" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding list_all}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                    <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
-                                    <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                    <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ListView x:Name="listAll" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding [all]}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
+                                        <Image Source="{Binding ImageBmp}" HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="UniformToFill" />
+                                        <TextBlock Text="{Binding Info}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                        <TextBlock Text="{Binding FilePath}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
                 </TabItem.Content>
+                
             </TabItem>
         </TabControl>
-        <ProgressBar Name="progress_bar" HorizontalAlignment="Center" Height="30" Grid.Row="2" VerticalAlignment="Center" Width="270"/>
+        <ProgressBar Name="progress_bar" HorizontalAlignment="Stretch" Height="30" Grid.Row="2" VerticalAlignment="Center" Width="700" Maximum="1000"/>
         <TextBlock Name="txt_progress" HorizontalAlignment="Center" Grid.Row="2" TextWrapping="Wrap" Text="No task in process" VerticalAlignment="Center"/>
 
 
