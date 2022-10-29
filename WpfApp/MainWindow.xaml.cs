@@ -1,5 +1,4 @@
-﻿//using ConsoleApp;
-using SixLabors.ImageSharp;
+﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
@@ -69,6 +68,15 @@ namespace WpfApp
             IdCount++;
         }
 
+        public ImageInfo(ImageInfo obj)
+        {
+            this.Info = obj.Info;
+            this.FilePath = obj.FilePath;
+            this.Image = obj.Image;
+            this.ImageBmp = obj.ImageBmp;
+            this.Id = obj.Id;
+        }
+
         public string AssignInfo(List<Tuple<string, float>> emotions_list)
         {
             string _info = "";
@@ -76,32 +84,9 @@ namespace WpfApp
             this.Info = _info;
             return _info;
         }
-
-        //public BitmapSource ConvertRgb24ToBitmapSource(Image<Rgb24> image)
-        //{
-        //    PixelFormat pf = PixelFormats.Rgb24;
-        //    int width = image.Width;
-        //    int height = image.Height;
-        //    int rawStride = (width * pf.BitsPerPixel + 7) / 8;
-        //    byte[] rawImage = new byte[rawStride * height];
-
-        //    // Initialize the image with data.
-        //    //Random value = new Random();
-        //    //value.NextBytes(rawImage);
-        //    //using (MemoryStream stream = new MemoryStream())
-        //    //{
-        //        //encoder.Save(stream);
-        //        //byte[] bytes = stream.ToArray();
-        //        // Use the raw binary data elsewhere, or use the MemoryStream directly after seeking back to the beginning
-        //    //}
-
-        //    // Create a BitmapSource.
-        //    BitmapSource bitmap = BitmapSource.Create(width, height,
-        //        96, 96, pf, null,
-        //        rawImage, rawStride);
-        //    return bitmap;
-        //}
     }
+
+
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -153,7 +138,6 @@ namespace WpfApp
         public MainWindow()
         {
             InitializeComponent();
-            //EmotionCounter = new EmotionsLib.EmotionFerPlus();
         }
 
         private void LoadImagesCmd(object sender, RoutedEventArgs e)
@@ -166,21 +150,14 @@ namespace WpfApp
             {
                 file_names = ofd.FileNames;
             }
-            //else throw new Exception("OpenFileDialog not working");
             else return;
-
-            //MessageBox.Show($"{ImageInfo.IdCount}");
 
             foreach (string file_name in file_names)
             {
                 Image<Rgb24> image = SixLabors.ImageSharp.Image.Load<Rgb24>(file_name);
                 BitmapImage imgBmi = new BitmapImage(new Uri(file_name));
-                //image.Frames
-                //imgBmi.DecodePixelHeight = 10;
-                //string fileName = file_name.Remove(0, file_name.LastIndexOf('\\') + 1);
                 list_new.Add(new ImageInfo(file_name.Remove(0, file_name.LastIndexOf('\\') + 1), image, imgBmi));
             }
-            //Console.WriteLine($"New images: {list_new.Count}");
             listNew.ItemsSource = list_new;
         }
 
@@ -199,11 +176,8 @@ namespace WpfApp
             string field = Emotions[0].Item1;
             dict_new[field].Add(image);
             dict_new["all"].Add(image);
-            //list_all.Add(image);
-            //list_new.Remove(image);
 
-            //MessageBox.Show($"Done {image.FilePath}");
-            return image;   //Emotions;
+            return image;
         }
 
         private void CancelCmd(object sender, RoutedEventArgs e)
@@ -277,33 +251,31 @@ namespace WpfApp
                         progress_bar.Value += 1;
                     }
 
-                    //foreach (var i in dict_new.Values) MessageBox.Show($"{i.Count}");
+                    foreach (var i in dict_new.Values) MessageBox.Show($"{i.Count}");
 
                     progress_bar.Visibility = Visibility.Hidden;
                     txt_progress.Visibility = Visibility.Visible;
 
+                    //MessageBox.Show($"{dict_new.Keys.ToList()}");
+
                     foreach (var state in dict_new.Keys)
                     {
-                        //var a = dict_all[state.Key];
-                        //dict_new[state].CopyTo(dict_all[state], dict_all[state].Count);
-                        // ForEach(collection.Add);
-                        //dict_all[state] = (ObservableCollection<ImageInfo>)dict_all[state].Concat(dict_new[state]);
                         foreach (var item in dict_new[state])
                         {
-                            dict_all[state].Add(item);
+                            dict_all[state].Add(new ImageInfo(item));
                         }
                     }
 
                     //foreach (var i in dict_all.Values) MessageBox.Show($"{i.Count}");
 
-                    foreach (var pair in dict_new)
+                    foreach (var val in dict_new.Values)
                     {
-                        pair.Value.Clear();
+                        val.Clear();
                     }
 
-                    //foreach (var i in dict_all.Values) MessageBox.Show($"{i.Count}");
+                    //foreach (var i in dict_new.Values) MessageBox.Show($"{i.Count}");
 
-                    list_new.Clear();
+                    dict_all["new"].Clear();
 
                     listAll.ItemsSource = dict_all["all"];
                     listNeutral.ItemsSource = dict_all["neutral"];
