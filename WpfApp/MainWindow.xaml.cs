@@ -94,28 +94,18 @@ namespace WpfApp
     public partial class MainWindow : Window
     {
         static List<string> emotions_list = new() { "neutral", "happiness", "surprise", "sadness", "anger", "disgust", "fear", "contempt" };
-        static ObservableCollection<ImageInfo> list_neutral = new();
-        static ObservableCollection<ImageInfo> list_happiness = new();
-        static ObservableCollection<ImageInfo> list_surprise = new();
-        static ObservableCollection<ImageInfo> list_sadness = new();
-        static ObservableCollection<ImageInfo> list_anger = new();
-        static ObservableCollection<ImageInfo> list_disgust = new();
-        static ObservableCollection<ImageInfo> list_fear = new() ;
-        static ObservableCollection<ImageInfo> list_contempt = new();
-        static ObservableCollection<ImageInfo> list_new = new();
-        static ObservableCollection<ImageInfo> list_all = new();
         Dictionary<string, ObservableCollection<ImageInfo>> dict_all = new Dictionary<string, ObservableCollection<ImageInfo>>()
         {
-            { "neutral", list_neutral },
-            { "happiness", list_happiness },
-            { "surprise", list_surprise },
-            { "sadness", list_sadness },
-            { "anger", list_anger },
-            { "disgust", list_disgust },
-            { "fear", list_fear },
-            { "contempt", list_contempt },
-            { "all", list_all },
-            { "new", list_new }
+            { "neutral", new ObservableCollection<ImageInfo>() },
+            { "happiness", new ObservableCollection<ImageInfo>() },
+            { "surprise", new ObservableCollection<ImageInfo>() },
+            { "sadness", new ObservableCollection<ImageInfo>() },
+            { "anger", new ObservableCollection<ImageInfo>() },
+            { "disgust", new ObservableCollection<ImageInfo>() },
+            { "fear", new ObservableCollection<ImageInfo>() },
+            { "contempt", new ObservableCollection<ImageInfo>() },
+            { "all", new ObservableCollection<ImageInfo>() },
+            { "new", new ObservableCollection<ImageInfo>() }
         };
 
         Dictionary<string, ObservableCollection<ImageInfo>> dict_new = new Dictionary<string, ObservableCollection<ImageInfo>>()
@@ -138,6 +128,7 @@ namespace WpfApp
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = dict_all;
         }
 
         private void LoadImagesCmd(object sender, RoutedEventArgs e)
@@ -156,16 +147,13 @@ namespace WpfApp
             {
                 Image<Rgb24> image = SixLabors.ImageSharp.Image.Load<Rgb24>(file_name);
                 BitmapImage imgBmi = new BitmapImage(new Uri(file_name));
-                list_new.Add(new ImageInfo(file_name.Remove(0, file_name.LastIndexOf('\\') + 1), image, imgBmi));
+                dict_all["new"].Add(new ImageInfo(file_name.Remove(0, file_name.LastIndexOf('\\') + 1), image, imgBmi));
             }
-            listNew.ItemsSource = list_new;
+            listNew.ItemsSource = dict_all["new"];
         }
 
         private async Task<ImageInfo> AnalyzeImage(ImageInfo image, CancellationTokenSource cts)
         {
-            //CancellationTokenSource cts = new CancellationTokenSource();
-            //CancellationToken token = cts.Token;
-
             var Emotions = await Task.Run(async () =>
             {
                 var emotions = EmotionCounter.EmotionRecognition(image.Image, cts.Token).Result;
@@ -206,15 +194,12 @@ namespace WpfApp
             if (((TabItem)TabCtrl.SelectedItem).HasHeader)
             {
                 var i = ((TabItem)TabCtrl.SelectedItem).Header.ToString().ToLower();
-                MessageBox.Show($"{i /*dict_all[i].ToString()*/}");
                 dict_all[i].Clear();
-                //MessageBox.Show($"{dict_all[i].Count.ToString()}");
             } else
             {
                 MessageBox.Show($"Header not found in this tab");
                 var ind = TabCtrl.SelectedIndex;
                 dict_all[emotions_list[ind]].Clear();
-                //MessageBox.Show($"{dict_all[emotions_list[ind]].Count.ToString()}");
             }
         }
 
@@ -226,37 +211,35 @@ namespace WpfApp
             }
         }
 
-        private void AnalyzeImagesCmd(object sender, RoutedEventArgs e)
+        private async void AnalyzeImagesCmd(object sender, RoutedEventArgs e)
         {
-            if (list_new.Count == 0)
+            if (dict_all["new"].Count == 0)
             {
                 MessageBox.Show("No images to analyze");
             }
             else
             {
+                TaskInProcess = true;
+
                 try
                 {
-                    TaskInProcess = true;
 
                     progress_bar.Visibility = Visibility.Visible;
-                    progress_bar.Maximum = list_new.Count;
+                    progress_bar.Maximum = dict_all["new"].Count;
+                    progress_bar.Value = 0;
+                    var step = progress_bar.Maximum / dict_all["new"].Count;
                     txt_progress.Visibility = Visibility.Hidden;
 
                     cts = new CancellationTokenSource();
-                    
-                    foreach (var image in list_new)
-                    {
-                        //MessageBox.Show($"{image.Id}, {image.Info}");
-                        _ = AnalyzeImage(image, cts);
-                        progress_bar.Value += 1;
-                    }
 
-                    foreach (var i in dict_new.Values) MessageBox.Show($"{i.Count}");
+                    foreach (var image in dict_all["new"])
+                    {
+                        await AnalyzeImage(image, cts);
+                        progress_bar.Value += step;
+                    }
 
                     progress_bar.Visibility = Visibility.Hidden;
                     txt_progress.Visibility = Visibility.Visible;
-
-                    //MessageBox.Show($"{dict_new.Keys.ToList()}");
 
                     foreach (var state in dict_new.Keys)
                     {
@@ -266,14 +249,10 @@ namespace WpfApp
                         }
                     }
 
-                    //foreach (var i in dict_all.Values) MessageBox.Show($"{i.Count}");
-
                     foreach (var val in dict_new.Values)
                     {
                         val.Clear();
                     }
-
-                    //foreach (var i in dict_new.Values) MessageBox.Show($"{i.Count}");
 
                     dict_all["new"].Clear();
 
@@ -287,7 +266,6 @@ namespace WpfApp
                     listFear.ItemsSource = dict_all["fear"];
                     listContempt.ItemsSource = dict_all["contempt"];
 
-                    //foreach (var i in dict_all.Values) MessageBox.Show($"{i.Count}");
                 }
                 catch
                 {
