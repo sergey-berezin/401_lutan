@@ -1,4 +1,5 @@
-﻿using SixLabors.ImageSharp;
+﻿using Microsoft.Win32;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+//using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -133,13 +135,18 @@ namespace WpfApp
 
         private void LoadImagesCmd(object sender, RoutedEventArgs e)
         {
-            var ofd = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
-            ofd.Multiselect = true;
+            var fbd = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
+            //var ofd = new FolderBrowserDialog();
+            //ofd.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG";
+            //fbd.Multiselect = true;
+            string path;
             string[] file_names;
 
-            if (ofd.ShowDialog() == true)
+
+            if (fbd.ShowDialog() == true)
             {
-                file_names = ofd.FileNames;
+                path = fbd.SelectedPath;
+                file_names = Directory.GetFiles(path);
             }
             else return;
 
@@ -220,6 +227,8 @@ namespace WpfApp
             else
             {
                 TaskInProcess = true;
+                mi_analyze.IsEnabled = false;
+                mi_load.IsEnabled = false;
 
                 try
                 {
@@ -273,6 +282,8 @@ namespace WpfApp
                 }
 
                 TaskInProcess = false;
+                mi_load.IsEnabled = true;
+                mi_analyze.IsEnabled = true;
             }
         }
     }

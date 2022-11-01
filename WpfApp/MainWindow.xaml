@@ -17,8 +17,8 @@
 
         <Menu Height ="25" Grid.Row="0">
             <!--VerticalAlignment="Stretch"-->
-            <MenuItem Header="Load images" Click="LoadImagesCmd" Height="25" BorderBrush="Black"/>
-            <MenuItem Header="Analyze" Click="AnalyzeImagesCmd" BorderBrush="Black"/>
+            <MenuItem Name="mi_load" Header="Load images" Click="LoadImagesCmd" Height="25" BorderBrush="Black" IsEnabled="True"/>
+            <MenuItem Name="mi_analyze" Header="Analyze" Click="AnalyzeImagesCmd" BorderBrush="Black" IsEnabled="True"/>
             <MenuItem Header="Cancel" Click="CancelCmd"  BorderBrush="Black"/>
             <MenuItem Header="Clear" Click="ClearCmd"  BorderBrush="Black"/>
             <MenuItem Header="Clear all" Click="ClearAllCmd"  BorderBrush="Black"/>
