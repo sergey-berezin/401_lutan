@@ -25,7 +25,6 @@ namespace EmotionsLib
             return await Task<List<Tuple<string, float>>>.Factory.StartNew(() =>
             {
                 //token.ThrowIfCancellationRequested();
-
                 image.Mutate(ctx => ctx.Resize(new Size(64, 64)));
                 var inputs = new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor("Input3", GrayscaleImageToTensor(image)) };
 

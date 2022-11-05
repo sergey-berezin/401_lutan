@@ -10,6 +10,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "ConsoleApp\Co
 		{F5344046-C251-4E98-8AA5-91E88132AB0C} = {F5344046-C251-4E98-8AA5-91E88132AB0C}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApp", "WpfApp\WpfApp.csproj", "{B3380680-5EF1-4BE1-9848-4125E5E4ACA6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7298517A-A0A4-464B-86BA-048C56772ED7} = {7298517A-A0A4-464B-86BA-048C56772ED7}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +29,10 @@ Global
 		{7298517A-A0A4-464B-86BA-048C56772ED7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7298517A-A0A4-464B-86BA-048C56772ED7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7298517A-A0A4-464B-86BA-048C56772ED7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3380680-5EF1-4BE1-9848-4125E5E4ACA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3380680-5EF1-4BE1-9848-4125E5E4ACA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3380680-5EF1-4BE1-9848-4125E5E4ACA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3380680-5EF1-4BE1-9848-4125E5E4ACA6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
