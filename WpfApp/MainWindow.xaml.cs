@@ -26,96 +26,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Polly;
+using System.Net.Http;
+using Polly.Retry;
+using System.Security.Cryptography;
 
 namespace WpfApp
 {
-    public class ImageInfo
-    {
-        private int id;
-        public int Id
-        {
-            get { return this.id; }
-            set { this.id = value; }
-        }
-
-        public static int IdCount = 0;
-
-        private string filePath;
-        public string FilePath
-        {
-            get { return this.filePath; }
-            set { this.filePath = value; }
-        }
-
-        private string section;
-        public string Section
-        {
-            get { return this.section; }
-            set { this.section = value; }
-        }
-
-        private string info;
-        public string Info
-        {
-            get { return this.info; }
-            set { this.info = value; }
-        }
-
-        private BitmapImage imageBmp;
-        public BitmapImage ImageBmp
-        {
-            get { return this.imageBmp; }
-            set { this.imageBmp = value; }
-        }
-        public ImageInfo(string fp, BitmapImage bmi, string info, string sect)
-        {
-            if (info == "") this.Info = "Waiting for analysis";
-            else this.Info = info;
-            this.FilePath = fp;
-            this.ImageBmp = bmi;
-            this.Id = IdCount;
-            IdCount++;
-            this.Section = sect;
-        }
-
-        public ImageInfo(ImageInfo obj)
-        {
-            this.Info = obj.Info;
-            this.FilePath = obj.FilePath;
-            this.ImageBmp = obj.ImageBmp;
-            this.Id = obj.Id;
-            this.Section = obj.Section;
-        }
-
-        public string AssignInfo(List<Tuple<string, float>> emotions_list)
-        {
-            string _info = "";
-            foreach (var emotion in emotions_list) _info += $"{emotion.Item1} : {emotion.Item2}\n";
-            this.Info = _info;
-            return _info;
-        }
-    }
-
-
-    class Picture
-    {
-        [Key]
-        public int ImageId { get; set; }
-        public string Path { get; set; }
-        public int Hash { get; set; }
-        public string Section { get; set; }
-        public string Info { get; set; }
-        public int Deleted { get; set; }
-        public byte[] Image { get; set; }
-
-        //void get_hash
-
-        //public Picture() { }
-    }
-
     class ImageContext : DbContext
     {
         public DbSet<Picture> Pictures { get; set; }
+        public DbSet<PictureHash> PicturesHash { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder o)
         {
@@ -161,6 +82,26 @@ namespace WpfApp
         CancellationTokenSource cts;
         bool TaskInProcess = false;
 
+        // ----- task 4 -----
+        // private AsyncRetryPolicy retryPolicy;
+        // private int MAX_RETRIES = 3;
+        // private string url = "http://localhost:5000/images";
+        // ----------------------------
+
+        static string ComputeSha256Hash(byte[] rawData)
+        {  
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                byte[] bytes = sha256Hash.ComputeHash(rawData);
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return builder.ToString();
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -168,7 +109,8 @@ namespace WpfApp
             {
                 if (db.Pictures.Any())
                 {
-                    var imgs = db.Pictures.Where(a => a.Deleted.Equals(0));
+                    //var imgs = db.Pictures.Where(a => a.Deleted.Equals(0));
+                    var imgs = db.Pictures;
                     foreach (var img in imgs)
                     {
                         string file_name = img.Path;
@@ -182,6 +124,8 @@ namespace WpfApp
                 }
             }
             DataContext = dict_all;
+            //retryPolicy = Policy.Handle<HttpRequestException>().WaitAndRetryAsync(MAX_RETRIES, times => 
+                   // TimeSpan.FromMilliseconds(times * 500));
         }
 
         private void LoadImagesCmd(object sender, RoutedEventArgs e)
@@ -192,7 +136,6 @@ namespace WpfApp
             //fbd.Multiselect = true;
             string path;
             string[] file_names;
-
 
             if (fbd.ShowDialog() == true)
             {
@@ -249,19 +192,20 @@ namespace WpfApp
             }
         }
 
-        private void ClearCmd(object sender, RoutedEventArgs e)
-        {
-            if (((TabItem)TabCtrl.SelectedItem).HasHeader)
-            {
-                var i = ((TabItem)TabCtrl.SelectedItem).Header.ToString().ToLower();
-                dict_all[i].Clear();
-            } else
-            {
-                MessageBox.Show($"Header not found in this tab");
-                var ind = TabCtrl.SelectedIndex;
-                dict_all[emotions_list[ind]].Clear();
-            }
-        }
+        //private void ClearCmd(object sender, RoutedEventArgs e)
+        //{
+        //    if (((TabItem)TabCtrl.SelectedItem).HasHeader)
+        //    {
+        //        var i = ((TabItem)TabCtrl.SelectedItem).Header.ToString().ToLower();
+
+        //        dict_all[i].Clear();
+        //    } else
+        //    {
+        //        MessageBox.Show($"Header not found in this tab");
+        //        var ind = TabCtrl.SelectedIndex;
+        //        dict_all[emotions_list[ind]].Clear();
+        //    }
+        //}
 
         private void ClearAllCmd(object sender, RoutedEventArgs e)
         {
@@ -274,10 +218,15 @@ namespace WpfApp
                     }
                     MessageBox.Show("DB has been emptied.");
                 }
-                else
+                if (db.PicturesHash.Any())
                 {
-                    MessageBox.Show("DB was empty.");
+                    foreach (var pic in db.PicturesHash)
+                    {
+                        db.PicturesHash.Remove(pic);
+                    }
+                    MessageBox.Show("DB has been emptied.");
                 }
+                
                 db.SaveChanges();
             }
             foreach (var pair in dict_all)
@@ -314,61 +263,71 @@ namespace WpfApp
                         foreach (var image in dict_all["new"])
                         {
                             var img_byte = File.ReadAllBytes(image.FilePath);
-                            var img_hash = img_byte.GetHashCode();
+                            var img_hash = ComputeSha256Hash(img_byte);
+                            var img_right_hash = db.PicturesHash.Where(i => i.Hash.Equals(img_hash));
+                            MessageBox.Show($"{img_right_hash.Count()}"); 
 
-                            if (!db.Pictures.Any(i => i.Hash.Equals(img_hash)))
+
+                            if (img_right_hash.Count() == 0)
                             {
-                                if(!db.Pictures.Any(i => i.Image.Equals(img_byte)))
-                                {
+                                //var img_right_image = db.PicturesHash.Where(i => i.Image.Equals(img_byte));
+                                //MessageBox.Show($"{img_right_image.Count()}");
+
+                                //if (img_right_image.Count() == 0)
+                                //{
                                     string section = await AnalyzeImage(image, cts);
                                     Picture newPic = new Picture
                                     {
                                         Path = image.FilePath,
-                                        Hash = img_hash,
-                                        Deleted = 0,
-                                        Image = img_byte,
                                         Section = section,
                                         Info = image.Info
                                     };
                                     db.Pictures.Add(newPic);
                                     db.SaveChanges();
-                                }
-                                else
-                                {
-                                    var img = db.Pictures.Where(i => i.Image.Equals(img_byte)).First();
-                                    if (img.Deleted.Equals(1))
+
+                                    var newId = db.Pictures.OrderBy(i => i.ImageId).Last().ImageId;
+                                    //MessageBox.Show($"new Id {newId}");
+                                    PictureHash newPicHash = new PictureHash
                                     {
-                                        img.Deleted = 0;
-                                        db.Pictures.Update(img);
-                                        db.SaveChanges();
-                                    }
+                                        Hash = img_hash,
+                                        Image = img_byte,
+                                        ImageId = newId
+                                    };
 
-                                    BitmapImage imgBmi = new BitmapImage(new Uri(img.Path));
-                                    ImageInfo new_image = new ImageInfo(img.Path, imgBmi, img.Info, img.Section);
-                                    dict_all["all"].Add(new_image);
-                                    dict_all[img.Section].Add(new_image);
-
-                                }
-                            } 
+                                    db.PicturesHash.Add(newPicHash);
+                                    db.SaveChanges();
+                                //}
+                            }
                             else
                             {
-                                var img = db.Pictures.Where(i => i.Hash.Equals(img_hash)).First();
-                                if (img.Deleted.Equals(1))
+                                var img_right_image = img_right_hash.Where(i => i.Image.Equals(img_byte));
+
+                                if (img_right_image.Count() == 0)
                                 {
-                                    img.Deleted = 0;
-                                    db.Pictures.Update(img);
+                                    string section = await AnalyzeImage(image, cts);
+                                    Picture newPic = new Picture
+                                    {
+                                        Path = image.FilePath,
+                                        //Image = img_byte,
+                                        Section = section,
+                                        Info = image.Info
+                                    };
+                                    db.Pictures.Add(newPic);
+                                    db.SaveChanges();
+                                    var newId = db.Pictures.OrderBy(i => i.ImageId).Last().ImageId;
+                                        //Where(i => i.Equals(newPic)).Select(i => i.ImageId).FirstOrDefault();
+
+                                    PictureHash newPicHash = new PictureHash
+                                    {
+                                        Hash = img_hash,
+                                        Image = img_byte,
+                                        ImageId = newId
+                                    };
+
+                                    db.PicturesHash.Add(newPicHash);
                                     db.SaveChanges();
                                 }
-
-                                BitmapImage imgBmi = new BitmapImage(new Uri(img.Path));
-                                ImageInfo new_image = new ImageInfo(img.Path, imgBmi, img.Info, img.Section);
-                                dict_all["all"].Add(new_image);
-                                dict_all[img.Section].Add(new_image);
-
                             }
-
-                            
-
                             progress_bar.Value += step;
                         }
 
@@ -412,21 +371,6 @@ namespace WpfApp
             }
         }
 
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            using (var db = new ImageContext())
-            {
-                var pic_to_delete = db.Pictures.Where(i => i.Deleted.Equals(1));
-                if (pic_to_delete is not null)
-                {
-                    foreach (var img in pic_to_delete)
-                    {
-                        db.Pictures.Remove(img);
-                        db.SaveChanges();
-                    }
-                }
-            }
-        }
 
         private void DeleteImgCmd(object sender, RoutedEventArgs e)
         {
@@ -444,10 +388,10 @@ namespace WpfApp
 
                 using (var db = new ImageContext())
                 {
-                    var image_delete = db.Pictures.Where(i => i.Path.Equals(img_ii.FilePath)).First();
-                    image_delete.Deleted = 1;
-
-                    db.Pictures.Update(image_delete);
+                    var image_delete = db.Pictures.Where(i => i.Path.Equals(img_ii.FilePath)).FirstOrDefault();
+                    var image_hash_delete = db.PicturesHash.Where(i => i.ImageId.Equals(image_delete.ImageId)).FirstOrDefault();
+                    db.Pictures.Remove(image_delete);
+                    db.PicturesHash.Remove(image_hash_delete);
                     db.SaveChanges();
                 }
 

@@ -22,16 +22,6 @@ namespace WpfApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Deleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Hash")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<byte[]>("Image")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
-
                     b.Property<string>("Info")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -47,6 +37,24 @@ namespace WpfApp.Migrations
                     b.HasKey("ImageId");
 
                     b.ToTable("Pictures");
+                });
+
+            modelBuilder.Entity("WpfApp.PictureHash", b =>
+                {
+                    b.Property<int>("ImageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Hash")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("Image")
+                        .HasColumnType("BLOB");
+
+                    b.HasKey("ImageId");
+
+                    b.ToTable("PicturesHash");
                 });
 #pragma warning restore 612, 618
         }

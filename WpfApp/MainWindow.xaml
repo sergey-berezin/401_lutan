@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Closed="Window_Closed">
+        Title="MainWindow" Height="450" Width="800" > 
+    <!--Closed="Window_Closed">-->
     <Grid>
         <!--public string[] keys = { "neutral", "happiness", "surprise", "sadness", "anger", "disgust", "fear", "contempt" };-->
 
@@ -20,7 +21,7 @@
             <MenuItem Name="mi_load" Header="Load images" Click="LoadImagesCmd" Height="25" BorderBrush="Black" IsEnabled="True"/>
             <MenuItem Name="mi_analyze" Header="Analyze" Click="AnalyzeImagesCmd" BorderBrush="Black" IsEnabled="True"/>
             <MenuItem Header="Cancel" Click="CancelCmd"  BorderBrush="Black"/>
-            <MenuItem Header="Clear" Click="ClearCmd"  BorderBrush="Black"/>
+            <!--<MenuItem Header="ClearTab" Click="ClearCmd"  BorderBrush="Black"/>-->
             <MenuItem Header="Clear all" Click="ClearAllCmd"  BorderBrush="Black"/>
         </Menu>
 

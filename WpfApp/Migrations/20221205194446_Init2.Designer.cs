@@ -10,8 +10,8 @@ using WpfApp;
 namespace WpfApp.Migrations
 {
     [DbContext(typeof(ImageContext))]
-    [Migration("20221119103139_Initial")]
-    partial class Initial
+    [Migration("20221205194446_Init2")]
+    partial class Init2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,16 +24,6 @@ namespace WpfApp.Migrations
                     b.Property<int>("ImageId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<int>("Deleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Hash")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<byte[]>("Image")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
 
                     b.Property<string>("Info")
                         .IsRequired()
@@ -50,6 +40,24 @@ namespace WpfApp.Migrations
                     b.HasKey("ImageId");
 
                     b.ToTable("Pictures");
+                });
+
+            modelBuilder.Entity("WpfApp.PictureHash", b =>
+                {
+                    b.Property<int>("ImageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Hash")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("Image")
+                        .HasColumnType("BLOB");
+
+                    b.HasKey("ImageId");
+
+                    b.ToTable("PicturesHash");
                 });
 #pragma warning restore 612, 618
         }
