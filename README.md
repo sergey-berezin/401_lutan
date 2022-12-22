@@ -9,6 +9,7 @@ Lab 3:
 2. dotnet ef database update
 3. Запуск программы командой dotnet run
 
+
 Lab 4:
 
 Последовательность команд из директории ../401_lutan/Server :
@@ -24,3 +25,5 @@ Lab 4:
 https://localhost:7156/swagger/index.html#/Images
 или
 https://localhost:7156/swagger/v1/swagger.json
+
+

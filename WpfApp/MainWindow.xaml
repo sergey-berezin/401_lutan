@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp"
         mc:Ignorable="d"
+
         Title="MainWindow" Height="450" Width="800" >
+
     <!--Closed="Window_Closed">-->
     <Grid>
         <!--public string[] keys = { "neutral", "happiness", "surprise", "sadness", "anger", "disgust", "fear", "contempt" };-->
@@ -17,6 +19,7 @@
         </Grid.RowDefinitions>
 
         <Menu Height ="25" Grid.Row="0">
+
             <MenuItem Name="mi_load" Header="Load images" Click="LoadImagesCmd" Height="25" BorderBrush="Black" IsEnabled="True"/>
             <MenuItem Name="mi_analyze" Header="Analyze" Click="AnalyzeImagesCmd" BorderBrush="Black" IsEnabled="True"/>
             <MenuItem Header="Cancel" Click="CancelCmd"  BorderBrush="Black"/>
@@ -258,7 +261,6 @@
                 </TabItem.Content>
             </TabItem>
             <TabItem Header="All">
-
                 <TabItem.Content>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <ListView x:Name="listAll" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding [all]}">
@@ -284,7 +286,6 @@
                         </ListView>
                     </ScrollViewer>
                 </TabItem.Content>
-
             </TabItem>
         </TabControl>
         <ProgressBar Name="progress_bar" HorizontalAlignment="Stretch" Height="30" Grid.Row="2" VerticalAlignment="Center" Width="700" Maximum="1000"/>
