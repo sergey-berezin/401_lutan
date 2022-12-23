@@ -30,20 +30,14 @@ using Polly;
 using System.Net.Http;
 using Polly.Retry;
 using System.Security.Cryptography;
+using Newtonsoft.Json;
+using System.Net.Http.Json;
+using Contracts;
+using System.Net.Http.Headers;
+using System.Net;
 
 namespace WpfApp
 {
-    class ImageContext : DbContext
-    {
-        public DbSet<Picture> Pictures { get; set; }
-        public DbSet<PictureHash> PicturesHash { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder o)
-        {
-            o.UseSqlite("Data Source=DatabaseEm.db");
-        }
-    }
-
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -51,89 +45,88 @@ namespace WpfApp
     public partial class MainWindow : Window
     {
         static List<string> emotions_list = new() { "neutral", "happiness", "surprise", "sadness", "anger", "disgust", "fear", "contempt" };
-        Dictionary<string, ObservableCollection<ImageInfo>> dict_all = new Dictionary<string, ObservableCollection<ImageInfo>>()
+        Dictionary<string, ObservableCollection<Picture>> dict_all = new Dictionary<string, ObservableCollection<Picture>>()
         {
-            { "neutral", new ObservableCollection<ImageInfo>() },
-            { "happiness", new ObservableCollection<ImageInfo>() },
-            { "surprise", new ObservableCollection<ImageInfo>() },
-            { "sadness", new ObservableCollection<ImageInfo>() },
-            { "anger", new ObservableCollection<ImageInfo>() },
-            { "disgust", new ObservableCollection<ImageInfo>() },
-            { "fear", new ObservableCollection<ImageInfo>() },
-            { "contempt", new ObservableCollection<ImageInfo>() },
-            { "all", new ObservableCollection<ImageInfo>() },
-            { "new", new ObservableCollection<ImageInfo>() }
+            { "neutral", new ObservableCollection<Picture>() },
+            { "happiness", new ObservableCollection<Picture>() },
+            { "surprise", new ObservableCollection<Picture>() },
+            { "sadness", new ObservableCollection<Picture>() },
+            { "anger", new ObservableCollection<Picture>() },
+            { "disgust", new ObservableCollection<Picture>() },
+            { "fear", new ObservableCollection<Picture>() },
+            { "contempt", new ObservableCollection<Picture>() },
+            { "all", new ObservableCollection<Picture>() },
+            { "new", new ObservableCollection<Picture>() }
         };
 
-        Dictionary<string, ObservableCollection<ImageInfo>> dict_new = new Dictionary<string, ObservableCollection<ImageInfo>>()
+        Dictionary<string, ObservableCollection<Picture>> dict_new = new Dictionary<string, ObservableCollection<Picture>>()
         {
-            { "neutral", new ObservableCollection<ImageInfo>() },
-            { "happiness", new ObservableCollection<ImageInfo>() },
-            { "surprise", new ObservableCollection<ImageInfo>() },
-            { "sadness", new ObservableCollection<ImageInfo>() },
-            { "anger", new ObservableCollection<ImageInfo>() },
-            { "disgust", new ObservableCollection<ImageInfo>() },
-            { "fear", new ObservableCollection<ImageInfo>() },
-            { "contempt", new ObservableCollection<ImageInfo>() },
-            { "all", new ObservableCollection<ImageInfo>() },
+            { "neutral", new ObservableCollection<Picture>() },
+            { "happiness", new ObservableCollection<Picture>() },
+            { "surprise", new ObservableCollection<Picture>() },
+            { "sadness", new ObservableCollection<Picture>() },
+            { "anger", new ObservableCollection<Picture>() },
+            { "disgust", new ObservableCollection<Picture>() },
+            { "fear", new ObservableCollection<Picture>() },
+            { "contempt", new ObservableCollection<Picture>() },
+            { "all", new ObservableCollection<Picture>() },
         };
 
-        EmotionsLib.EmotionFerPlus EmotionCounter = new();
-        CancellationTokenSource cts;
+        CancellationTokenSource cts = new();
         bool TaskInProcess = false;
-
-        // ----- task 4 -----
-        // private AsyncRetryPolicy retryPolicy;
-        // private int MAX_RETRIES = 3;
-        // private string url = "http://localhost:5000/images";
-        // ----------------------------
-
-        static string ComputeSha256Hash(byte[] rawData)
-        {  
-            using (SHA256 sha256Hash = SHA256.Create())
-            {
-                byte[] bytes = sha256Hash.ComputeHash(rawData);
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2"));
-                }
-                return builder.ToString();
-            }
-        }
+        private AsyncRetryPolicy retryPolicy;
+        private int MAX_RETRIES = 3;
+        private string URL = "https://localhost:7156/api/images";
 
         public MainWindow()
         {
             InitializeComponent();
-            using (var db = new ImageContext())
-            {
-                if (db.Pictures.Any())
-                {
-                    //var imgs = db.Pictures.Where(a => a.Deleted.Equals(0));
-                    var imgs = db.Pictures;
-                    foreach (var img in imgs)
-                    {
-                        string file_name = img.Path;
-                        BitmapImage imgBmi = new BitmapImage(new Uri(file_name));
-                        string info = img.Info;
-                        //string short_name = file_name.Remove(0, file_name.LastIndexOf('\\') + 1);
-                        var tmp = new ImageInfo(file_name, imgBmi, info, img.Section);
-                        dict_all["all"].Add(tmp);
-                        dict_all[img.Section].Add(tmp);
-                    }
-                }
-            }
+
+            retryPolicy = Policy.Handle<HttpRequestException>().WaitAndRetryAsync(MAX_RETRIES, times =>
+                   TimeSpan.FromMilliseconds(times * 200));
+
+            loadExistingImagesAsync();
             DataContext = dict_all;
-            //retryPolicy = Policy.Handle<HttpRequestException>().WaitAndRetryAsync(MAX_RETRIES, times => 
-                   // TimeSpan.FromMilliseconds(times * 500));
         }
+
+        private async Task loadExistingImagesAsync()
+        {
+            try
+            {
+                await retryPolicy.ExecuteAsync(async () =>
+                {
+                    HttpClient client = new HttpClient();
+                    var result = await client.GetAsync(URL); //, cts.Token);
+
+                    if (result.IsSuccessStatusCode)
+                    {
+                        var existingImages = await result.Content.ReadFromJsonAsync<ObservableCollection<Picture>>();
+                        //MessageBox.Show($"{existingImages.Count}");
+                        foreach (var img in existingImages)
+                        {
+                            dict_all["all"].Add(img);
+                            dict_all[img.Section].Add(img);
+                        }
+                    }
+                    else
+                    {
+
+                        MessageBox.Show($"Error: code {result.StatusCode}, message {result.Content}");
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
 
         private void LoadImagesCmd(object sender, RoutedEventArgs e)
         {
             var fbd = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
             //var ofd = new FolderBrowserDialog();
-            //ofd.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG";
-            //fbd.Multiselect = true;
+            //ofd.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG";  
             string path;
             string[] file_names;
 
@@ -146,29 +139,10 @@ namespace WpfApp
 
             foreach (string file_name in file_names)
             {
-                BitmapImage imgBmi = new BitmapImage(new Uri(file_name));
                 //string short_name = file_name.Remove(0, file_name.LastIndexOf('\\') + 1);
-                dict_all["new"].Add(new ImageInfo(file_name, imgBmi, "", ""));
+                dict_all["new"].Add(new Picture(file_name, "", ""));
             }
             listNew.ItemsSource = dict_all["new"];
-        }
-
-        private async Task<string> AnalyzeImage(ImageInfo image, CancellationTokenSource cts)
-        {
-            var Emotions = await Task.Run(async () =>
-            {
-                Image<Rgb24> img_rgb = SixLabors.ImageSharp.Image.Load<Rgb24>(image.FilePath);
-                var emotions = EmotionCounter.EmotionRecognition(img_rgb, cts.Token).Result;
-                emotions.Sort((a, b) => -(a.Item2.CompareTo(b.Item2)));
-                image.AssignInfo(emotions);
-                return emotions;
-            }, cts.Token);
-            string field = Emotions[0].Item1;
-            image.Section = field;
-            dict_new[field].Add(image);
-            dict_new["all"].Add(image);
-
-            return field;
         }
 
         private void CancelCmd(object sender, RoutedEventArgs e)
@@ -180,7 +154,7 @@ namespace WpfApp
             else
             {
                 cts.Cancel();
-                foreach (var pair in dict_all)
+                foreach (var pair in dict_new)
                 {
                     pair.Value.Clear();
                 }
@@ -192,47 +166,25 @@ namespace WpfApp
             }
         }
 
-        //private void ClearCmd(object sender, RoutedEventArgs e)
-        //{
-        //    if (((TabItem)TabCtrl.SelectedItem).HasHeader)
-        //    {
-        //        var i = ((TabItem)TabCtrl.SelectedItem).Header.ToString().ToLower();
-
-        //        dict_all[i].Clear();
-        //    } else
-        //    {
-        //        MessageBox.Show($"Header not found in this tab");
-        //        var ind = TabCtrl.SelectedIndex;
-        //        dict_all[emotions_list[ind]].Clear();
-        //    }
-        //}
-
-        private void ClearAllCmd(object sender, RoutedEventArgs e)
+        private async void ClearAllCmd(object sender, RoutedEventArgs e)
         {
-            using (var db = new ImageContext())
+            try
             {
-                if (db.Pictures.Any()) {
-                    foreach (var pic in db.Pictures)
-                    {
-                        db.Pictures.Remove(pic);
-                    }
-                    MessageBox.Show("DB has been emptied.");
-                }
-                if (db.PicturesHash.Any())
+                HttpClient client = new HttpClient();
+                await retryPolicy.ExecuteAsync(async () =>
                 {
-                    foreach (var pic in db.PicturesHash)
+                    var status = await client.DeleteAsync(URL);
+                    foreach (var pair in dict_all)
                     {
-                        db.PicturesHash.Remove(pic);
+                        pair.Value.Clear();
                     }
-                    MessageBox.Show("DB has been emptied.");
-                }
-                
-                db.SaveChanges();
+                });
             }
-            foreach (var pair in dict_all)
+            catch (Exception ex)
             {
-                pair.Value.Clear();
+                MessageBox.Show(ex.Message);
             }
+
         }
 
         private async void AnalyzeImagesCmd(object sender, RoutedEventArgs e)
@@ -258,97 +210,57 @@ namespace WpfApp
 
                     cts = new CancellationTokenSource();
 
-                    using (var db = new ImageContext())
+                    foreach (var image in dict_all["new"])
                     {
-                        foreach (var image in dict_all["new"])
+                        await retryPolicy.ExecuteAsync(async () =>
                         {
-                            var img_byte = File.ReadAllBytes(image.FilePath);
-                            var img_hash = ComputeSha256Hash(img_byte);
-                            var img_right_hash = db.PicturesHash.Where(i => i.Hash.Equals(img_hash));
-                            MessageBox.Show($"{img_right_hash.Count()}"); 
+                            var client = new HttpClient();
+                            var img_bytes = await File.ReadAllBytesAsync(image.FilePath, cts.Token);
+                            var new_img = new NewPicture(image.FilePath, img_bytes);
+                            //MessageBox.Show("all going good");
 
+                            var response = await client.PostAsJsonAsync(URL, new_img, cts.Token);
 
-                            if (img_right_hash.Count() == 0)
+                            if (response.IsSuccessStatusCode)
                             {
-                                //var img_right_image = db.PicturesHash.Where(i => i.Image.Equals(img_byte));
-                                //MessageBox.Show($"{img_right_image.Count()}");
+                                //MessageBox.Show($"here, {response.IsSuccessStatusCode}, {response.StatusCode}");
 
-                                //if (img_right_image.Count() == 0)
-                                //{
-                                    string section = await AnalyzeImage(image, cts);
-                                    Picture newPic = new Picture
+                                if (response.StatusCode == HttpStatusCode.OK)
+                                {
+                                    var to_add = await response.Content.ReadFromJsonAsync<Picture>();
+                                    //MessageBox.Show("norm");
+                                    if (to_add != null)
                                     {
-                                        Path = image.FilePath,
-                                        Section = section,
-                                        Info = image.Info
-                                    };
-                                    db.Pictures.Add(newPic);
-                                    db.SaveChanges();
-
-                                    var newId = db.Pictures.OrderBy(i => i.ImageId).Last().ImageId;
-                                    //MessageBox.Show($"new Id {newId}");
-                                    PictureHash newPicHash = new PictureHash
-                                    {
-                                        Hash = img_hash,
-                                        Image = img_byte,
-                                        ImageId = newId
-                                    };
-
-                                    db.PicturesHash.Add(newPicHash);
-                                    db.SaveChanges();
-                                //}
+                                        dict_new["all"].Add(to_add);
+                                        dict_new[to_add.Section].Add(to_add);
+                                    }
+                                }
                             }
                             else
                             {
-                                var img_right_image = img_right_hash.Where(i => i.Image.Equals(img_byte));
-
-                                if (img_right_image.Count() == 0)
-                                {
-                                    string section = await AnalyzeImage(image, cts);
-                                    Picture newPic = new Picture
-                                    {
-                                        Path = image.FilePath,
-                                        //Image = img_byte,
-                                        Section = section,
-                                        Info = image.Info
-                                    };
-                                    db.Pictures.Add(newPic);
-                                    db.SaveChanges();
-                                    var newId = db.Pictures.OrderBy(i => i.ImageId).Last().ImageId;
-                                        //Where(i => i.Equals(newPic)).Select(i => i.ImageId).FirstOrDefault();
-
-                                    PictureHash newPicHash = new PictureHash
-                                    {
-                                        Hash = img_hash,
-                                        Image = img_byte,
-                                        ImageId = newId
-                                    };
-
-                                    db.PicturesHash.Add(newPicHash);
-                                    db.SaveChanges();
-                                }
+                                MessageBox.Show($"code {(int)response.StatusCode}, \n message:{await response.Content.ReadAsStringAsync()}");
                             }
-                            progress_bar.Value += step;
-                        }
-
-                        progress_bar.Visibility = Visibility.Hidden;
-                        txt_progress.Visibility = Visibility.Visible;
-
-                        foreach (var state in dict_new.Keys)
-                        {
-                            foreach (var item in dict_new[state])
-                            {
-                                dict_all[state].Add(new ImageInfo(item));
-                            }
-                        }
-
-                        foreach (var val in dict_new.Values)
-                        {
-                            val.Clear();
-                        }
-
-                        dict_all["new"].Clear();
+                        });
+                        progress_bar.Value += step;
                     }
+
+                    progress_bar.Visibility = Visibility.Hidden;
+                    txt_progress.Visibility = Visibility.Visible;
+
+                    foreach (var state in dict_new.Keys)
+                    {
+                        foreach (var item in dict_new[state])
+                        {
+                            dict_all[state].Add(new Picture(item));
+                        }
+                    }
+
+                    foreach (var val in dict_new.Values)
+                    {
+                        val.Clear();
+                    }
+
+                    dict_all["new"].Clear();
 
                     listAll.ItemsSource = dict_all["all"];
                     listNeutral.ItemsSource = dict_all["neutral"];
@@ -372,11 +284,11 @@ namespace WpfApp
         }
 
 
-        private void DeleteImgCmd(object sender, RoutedEventArgs e)
+        /*private void DeleteImgCmd(object sender, RoutedEventArgs e)
         {
             string section = "list" + ((TabItem)TabCtrl.SelectedItem).Header.ToString();
             var lv_curr = TabCtrl.FindName(section) as ListView;
-            var img_ii = lv_curr.SelectedItem as ImageInfo;
+            var img_ii = lv_curr.SelectedItem as Picture;
             
             if (img_ii.Section == "new")
             {
@@ -388,7 +300,7 @@ namespace WpfApp
 
                 using (var db = new ImageContext())
                 {
-                    var image_delete = db.Pictures.Where(i => i.Path.Equals(img_ii.FilePath)).FirstOrDefault();
+                    var image_delete = db.Pictures.Where(i => i.FilePath.Equals(img_ii.FilePath)).FirstOrDefault();
                     var image_hash_delete = db.PicturesHash.Where(i => i.ImageId.Equals(image_delete.ImageId)).FirstOrDefault();
                     db.Pictures.Remove(image_delete);
                     db.PicturesHash.Remove(image_hash_delete);
@@ -397,6 +309,6 @@ namespace WpfApp
 
                 MessageBox.Show("Deleted from db");
             }
-        }
+        }*/
     }
 }
